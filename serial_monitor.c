@@ -71,6 +71,7 @@
 int serial_open(char *serial_device)
 {
 	int status = open(serial_device, O_RDWR);
+	int port;
 	if(status<0 && status!=(-1)){
 		printf("\nError Opening Serial Device: %s",serial_device);
 	} else if(status==(-1)){
@@ -78,18 +79,19 @@ int serial_open(char *serial_device)
 		printf("\nError Code : %i, | %s",status,strerror(status));
 	} else{
 		printf("\nConnection Established with %s",serial_device);
-		serial_monitor_setup(serial_device,status);
+		port = serial_monitor_setup(serial_device,status);
 	}
-	return 0;
+	return port;
 }
 
 
 
-void serial_monitor_setup(char *serial_device,int port)
+int serial_monitor_setup(char *serial_device,int port)
 {
 	struct termios configuration;
 	if(tcgetattr(port, &configuration) != 0) {
-    printf("\nError %i from tcgetattr: %s\n", errno, strerror(errno));		
+    	printf("\nError %i from tcgetattr: %s\n", errno, strerror(errno));		
+		return 0;
 	}
 	
 	/* Configuration of Serial Port  Parity Bit,Stop bit, Bit Size --> 8,
@@ -108,10 +110,39 @@ void serial_monitor_setup(char *serial_device,int port)
 	configuration.c_lflag &= ~ECHOE;
 	configuration.c_lflag &= ~ECHONL;
 	
-	/* Input COntrol Flag Configuration */
-	configuration.c_iflag &= ~(IXON | IXOFF | IXANY); 	
-	configuration.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL);
+	/* Input Control Flag Configuration */
+//	configuration.c_iflag &= ~(IXON | IXOFF | IXANY); 	
+	configuration.c_iflag &= ~(IXON;)
+	/*  configuration.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL);*/
+	
+	/* Output Control Flag Configuration */
+	configuration.c_oflag &= ~OPOST;
+	configuration.c_oflag &= ~ONLCR;
+
+	configuration.c_cc[VTIME] = 10;
+	configuration.c_cc[VMIN] = 0;
+	
+	cfsetspeed(&configuration, B115200);
+	
+	if(tcsetattr(port,0, &configuration) != 0) {
+    	printf("\nError %i from tcsetattr: %s\n", errno, strerror(errno));		
+		return 0;
+	}
+	return port;
 }
+
+
+
+void serial_monitor(int port)
+{ char read_character;
+	
+	while(1){
+		if(read(port, read_character, 1)==1){
+			write(port,read_character,1);
+		}
+	}
+}
+
 
 
 
