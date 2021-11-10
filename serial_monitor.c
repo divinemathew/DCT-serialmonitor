@@ -68,8 +68,8 @@
 ***********************************/
 
 
-int serial_open(char *serial_device)
-{
+void serial_open(char *serial_device)
+{	
 	int status = open(serial_device, O_RDWR);
 	int port;
 	if(status<0 && status!=(-1)){
@@ -79,9 +79,9 @@ int serial_open(char *serial_device)
 		printf("\nError Code : %i, | %s",status,strerror(status));
 	} else{
 		printf("\nConnection Established with %s",serial_device);
-		port = serial_monitor_setup(serial_device,status);
+		serial_monitor_setup(serial_device,status);
 	}
-	return port;
+	serial_monitor_setup(serial_device,status);
 }
 
 
@@ -89,6 +89,8 @@ int serial_open(char *serial_device)
 int serial_monitor_setup(char *serial_device,int port)
 {
 	struct termios configuration;
+	struct termios terminal_configuration;
+
 	if(tcgetattr(port, &configuration) != 0) {
     	printf("\nError %i from tcgetattr: %s\n", errno, strerror(errno));		
 		return 0;
@@ -108,18 +110,18 @@ int serial_monitor_setup(char *serial_device,int port)
 	configuration.c_lflag &= ~ICANON;
 	configuration.c_lflag &= ~ECHO; 
 	configuration.c_lflag &= ~ECHOE;
-	configuration.c_lflag &= ~ECHONL;
+	configuration.c_lflag |= ECHONL;
 	
 	/* Input Control Flag Configuration */
-//	configuration.c_iflag &= ~(IXON | IXOFF | IXANY); 	
-	configuration.c_iflag &= ~(IXON;)
-	/*  configuration.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL);*/
+	configuration.c_iflag &= ~(IXON | IXOFF | IXANY); 	
+	configuration.c_iflag &= ~(IXON);
+ 	configuration.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL);
 	
 	/* Output Control Flag Configuration */
 	configuration.c_oflag &= ~OPOST;
 	configuration.c_oflag &= ~ONLCR;
 
-	configuration.c_cc[VTIME] = 10;
+	configuration.c_cc[VTIME] = 1;
 	configuration.c_cc[VMIN] = 0;
 	
 	cfsetspeed(&configuration, B115200);
@@ -128,22 +130,63 @@ int serial_monitor_setup(char *serial_device,int port)
     	printf("\nError %i from tcsetattr: %s\n", errno, strerror(errno));		
 		return 0;
 	}
+
+
+
+/*  
+	if(tcgetattr(STDIN_FILENO, &terminal_configuration) != 0) {
+    	printf("\nError %i from tcgetattr: %s\n", errno, strerror(errno));		
+		return 0;
+	}
+	
+	terminal_configuration.c_lflag &= ~ICANON;
+	terminal_configuration.c_cc[VTIME] = 1;
+	terminal_configuration.c_cc[VMIN] = 0;
+	terminal_configuration.c_cc
+
+
+	if(tcsetattr(STDIN_FILENO,0, &terminal_configuration) != 0) {
+    	printf("\nError %i from tcsetattr: %s\n", errno, strerror(errno));		
+		return 0;
+	}*/
+
+	serial_monitor(port);
 	return port;
 }
 
 
 
 void serial_monitor(int port)
-{ char read_character;
-	
+{ 	char received_data;
+ 	char transmit_data;
+
+	printf("\nReading Serial Device\n");	
 	while(1){
-		if(read(port, read_character, 1)==1){
-			write(port,read_character,1);
+		 /*  if(read(port,&received_data,sizeof(received_data))!=0){
+			printf("%c",received_data);
+			while(read(port,received_data,sizeof(received_data))!=0){
+				read(port,&received_data,sizeof(received_data));
+				printf("%c",received_data);
+			}
+		
+		}*/
+		/*  
+		transmit_data = getchar();
+		write(port,transmit_data,sizeof(transmit_data));*/
+
+		/*  while(read(port,&received_data,sizeof(received_data))){	
+			printf("%c",received_data);
+		}*/
+		
+
+				
+		 while(read(port,&received_data,sizeof(received_data))){	
+			printf("%c",received_data);
 		}
+		//read(port,&received_data,sizeof(received_data));
+		//printf("%c",received_data);	
+		//transmit_data = getchar();
+		read(0,&transmit_data,sizeof(transmit_data));
+		write(port,&transmit_data,sizeof(transmit_data));
 	}
 }
-
-
-
-
-

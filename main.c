@@ -75,9 +75,9 @@ int main(int argc, char *argv[])
 		printf("\nSearch Initialized for ");	
 		serial_device = argv[1];
 		printf("%s",serial_device);
-		serial_port_return = serial_open(serial_device);
+		serial_open(serial_device);
 		printf("\nConfiguration Successfully Completed");
-		serial_monitor(serial_port_return);
+		//serial_monitor(serial_port_return);
 	}
 	return 0;
 }
