@@ -92,12 +92,25 @@ void serial_monitor_setup(char *serial_device,int port)
     printf("\nError %i from tcgetattr: %s\n", errno, strerror(errno));		
 	}
 	
-	configuration.c_cflag &= ~(PARENB);
-	configuration.c_cflag &= ~(CSTOPB);
-	configuration.c_cflag &= ~(CSIZE);
-	configuration.c_cflag |= CS8;
-	configuration.c_cflag &= ~CRTSCTS;
+	/* Configuration of Serial Port  Parity Bit,Stop bit, Bit Size --> 8,
+ * Disable CTS,RTS*/
 	
+	configuration.c_cflag &= ~(PARENB); //parity
+	configuration.c_cflag &= ~(CSTOPB);	//stop bit
+	configuration.c_cflag &= ~(CSIZE);	//size of bit
+	configuration.c_cflag |= CS8;		// 8 bit data frame
+	configuration.c_cflag &= ~(CRTSCTS);
+	configuration.c_cflag |= CREAD | CLOCAL; 
+	
+	/* Local Modes Flag Configuration --> Non Canonical Form Activated*/
+	configuration.c_lflag &= ~ICANON;
+	configuration.c_lflag &= ~ECHO; 
+	configuration.c_lflag &= ~ECHOE;
+	configuration.c_lflag &= ~ECHONL;
+	
+	/* Input COntrol Flag Configuration */
+	configuration.c_iflag &= ~(IXON | IXOFF | IXANY); 	
+	configuration.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL);
 }
 
 
