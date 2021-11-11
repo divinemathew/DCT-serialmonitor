@@ -10,7 +10,7 @@
 * @note
 *
 * Revision History:
-* - 240921  DAM : Creation Date
+* -101121  DAM : Creation Date
 */
 
 #include <stdio.h>
@@ -68,6 +68,22 @@
 ***********************************/
 
 
+/**
+* @serial_open.c
+* @brief 
+*
+*This program opens the serial device and saves the file descriptor
+*
+*
+* 
+* @note
+* @param 	serial_device 		serial port name
+* @return	null
+*
+* Revision History:
+* -101121  DAM : Creation Date
+*/
+
 void serial_open(char *serial_device)
 {	
 	int status = open(serial_device, O_RDWR);
@@ -85,6 +101,22 @@ void serial_open(char *serial_device)
 }
 
 
+/**
+* @serial_monitor_setup.c
+* @brief 
+*
+*This program configures serial port and terminal
+*
+*
+* 
+* @note
+* @param 	serial_device 		serial port name
+* @param	int port		file descriptor
+* @return	null
+*
+* Revision History:
+* -101121  DAM : Creation Date
+*/
 
 int serial_monitor_setup(char *serial_device,int port)
 {
@@ -133,27 +165,44 @@ int serial_monitor_setup(char *serial_device,int port)
 
 
 
-/*  
+
 	if(tcgetattr(STDIN_FILENO, &terminal_configuration) != 0) {
     	printf("\nError %i from tcgetattr: %s\n", errno, strerror(errno));		
 		return 0;
 	}
 	
 	terminal_configuration.c_lflag &= ~ICANON;
+	
 	terminal_configuration.c_cc[VTIME] = 1;
 	terminal_configuration.c_cc[VMIN] = 0;
-	terminal_configuration.c_cc
 
 
 	if(tcsetattr(STDIN_FILENO,0, &terminal_configuration) != 0) {
     	printf("\nError %i from tcsetattr: %s\n", errno, strerror(errno));		
 		return 0;
-	}*/
+	}
 
 	serial_monitor(port);
 	return port;
 }
 
+
+
+/**
+* @serial_monitor.c
+* @brief 
+*
+*This program opens the serial monitor
+*
+*
+* 
+* @note
+* @param 	port 		file descriptor
+* @return	null
+*
+* Revision History:
+* -101121  DAM : Creation Date
+*/
 
 
 void serial_monitor(int port)
