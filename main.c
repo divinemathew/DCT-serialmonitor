@@ -2,23 +2,23 @@
 * @main.c
 * @brief 
 *
-*This program is used to get customer details froom user and displays it
+*This program is used to get serial data from a serial device and displays over terminal
 *
 *
 * 
 * @note
 *
 * Revision History:
-* - 240921  DAM : Creation Date
+* - 101121  DAM : Creation Date
 */
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <fcntl.h> // Contains file controls like O_RDWR
-#include <errno.h> // Error integer and strerror() function
-#include <termios.h> // Contains POSIX terminal control definitions
-#include <unistd.h> // write(), read(), close()
+#include <fcntl.h> 
+#include <errno.h> 
+#include <termios.h> 
+#include <unistd.h> 
 #include "serial_monitor.h"
 
 /*******************************************
