@@ -97,7 +97,6 @@ void serial_open(char *serial_device)
 		printf("\nConnection Established with %s",serial_device);
 		serial_monitor_setup(serial_device,status);
 	}
-	serial_monitor_setup(serial_device,status);
 }
 
 
@@ -153,7 +152,7 @@ int serial_monitor_setup(char *serial_device,int port)
 	configuration.c_oflag &= ~OPOST;
 	configuration.c_oflag &= ~ONLCR;
 
-	configuration.c_cc[VTIME] = 1;
+	configuration.c_cc[VTIME] = 0;
 	configuration.c_cc[VMIN] = 0;
 	
 	cfsetspeed(&configuration, B115200);
@@ -172,9 +171,11 @@ int serial_monitor_setup(char *serial_device,int port)
 	}
 	
 	terminal_configuration.c_lflag &= ~ICANON;
-	
-	terminal_configuration.c_cc[VTIME] = 1;
+	terminal_configuration.c_lflag &= ~ECHO;	
+	terminal_configuration.c_lflag &= ~ECHONL;
+	terminal_configuration.c_cc[VTIME] = 0;
 	terminal_configuration.c_cc[VMIN] = 0;
+ 	terminal_configuration.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL);
 
 
 	if(tcsetattr(STDIN_FILENO,0, &terminal_configuration) != 0) {
@@ -210,32 +211,12 @@ void serial_monitor(int port)
  	char transmit_data;
 
 	printf("\nReading Serial Device\n");	
-	while(1){
-		 /*  if(read(port,&received_data,sizeof(received_data))!=0){
-			printf("%c",received_data);
-			while(read(port,received_data,sizeof(received_data))!=0){
-				read(port,&received_data,sizeof(received_data));
-				printf("%c",received_data);
-			}
-		
-		}*/
-		/*  
-		transmit_data = getchar();
-		write(port,transmit_data,sizeof(transmit_data));*/
-
-		/*  while(read(port,&received_data,sizeof(received_data))){	
-			printf("%c",received_data);
-		}*/
-		
-
-				
-		 while(read(port,&received_data,sizeof(received_data))){	
-			printf("%c",received_data);
+	while(1){	
+		if(read(port,&received_data,sizeof(received_data))>0){
+			write(STDIN_FILENO,&received_data,sizeof(received_data));
 		}
-		//read(port,&received_data,sizeof(received_data));
-		//printf("%c",received_data);	
-		//transmit_data = getchar();
-		read(0,&transmit_data,sizeof(transmit_data));
-		write(port,&transmit_data,sizeof(transmit_data));
-	}
+		if(read(STDIN_FILENO,&transmit_data,sizeof(transmit_data))>0){
+			write(port,&transmit_data,sizeof(transmit_data));
+		}
+}
 }
